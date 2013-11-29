@@ -1,0 +1,65 @@
+def OVERLORDTRZECIZWHILE(suet, lib, factor=4): #
+  
+    
+
+    if type(suet) == str:
+        suet = suet.split()
+    if type(lib) != str:
+        raise TypeError
+
+    def regex(kawalisty):
+        jeden = kawalisty
+        dwa = kawalisty
+        jeden[-2] = '[A-Z]*'
+        jeden = ' '.join(jeden)
+        dwa[-2] =   '[A-Z]* [A-Z]*'  #
+        dwa = ' '.join(dwa)
+        kawalisty = jeden+'|'+dwa
+        return kawalisty
+    bufor = []
+    kryptobufor = []
+    le = len(suet)
+    index = 0
+    while index < le - factor:
+        if ' '.join(suet[index:index + factor]) in lib:
+            tymczas = ' '.join(suet[index:index + factor])
+            z = 1
+            while z + index < le - factor:
+                if ' '.join(suet[index:index + factor + z]) in lib: # jesli ten kawalek jest w drugim tekscie
+                    tymczas = ' '.join(suet[index:index + factor + z])# maly bufor to zmienna ktora przechowuje znaleziony cytat
+                    z+=1 # to sprawdzaj czy moze nie jest do poczatek dluzszego cytatu: dodawaj po jednym slowie i sprawdzaj
+                else: # jesli dlugi cytat przestaje sie zgadzac, to wtedy sprawdz czy to nie jest lekki kryptocytat, albo cytat lekko przekrecony
+                    preregex = ' '.join(suet[index:index + factor + z + 1])
+                    utcom = re.findall(regex(suet[index:index + factor + z + 1]), lib)                    
+                    if len(utcom) > 0: 
+                        tymczas2 = [(znajda, preregex)for znajda in utcom]
+                        cyfra = 0
+                        while cyfra + z + index < le - factor:# i tu jedziemy dalej tz sprawdzamy jak dlugi jest ten kryptocytat
+                            preregex2 = ' '.join(suet[index:index + factor + z + 1 + cyfra])+' '+suet[index + factor + z + 1 + cyfra]
+                            
+                            res = regex(suet[index:index + factor + z + 1 + cyfra])
+                            
+                            res +=suet[index + factor + z + 1 + cyfra]
+                            
+                            utcom2 = re.findall(res, lib)
+                            
+                            if len(utcom2) > 0:
+                                
+                                tymczas2 = [(znajda, preregex)for znajda in utcom]                                
+                                cyfra +=1
+                            else:
+                                
+                                for w in tymczas2:
+                                    kryptobufor.append(w)
+                                index +=factor-1#x +=factor-1 
+                                break
+                    else:
+                        bufor.append(tymczas) 
+                        index +=len(tymczas)
+                        break
+        else:
+            index +=1 # czyli nic nie znalazl i idzie dalej o jeden krok 
+
+    
+    wynik  =(kryptobufor, bufor)
+    return wynik
